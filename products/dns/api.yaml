@@ -18,6 +18,10 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
+    default: true
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://www.googleapis.com/dns/v1beta2/
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 objects:
@@ -49,6 +53,38 @@ objects:
         description: |
           The DNS name of this managed zone, for instance "example.com.".
         required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'visibility'
+        description: |
+          "private" refers to a DNS zone that can only be queried from within
+          the VPC, and "public" refers to a public DNS zone. Must be one of:
+          `public`, `private`.
+        values:
+          - :private
+          - :public
+        default_value: :public
+        min_version: beta
+        required: false
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateVisibilityConfig'
+        description: |
+          For privately visible zones, the set of VPC resources that zone is
+          visible from.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'networks'
+            description: 'The list of VPC networks that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'networkUrl'
+                  description: |
+                    The fully qualified URL of the VPC network to bind to.
+                    This should be formatted like:
+                    https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}
+        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: Unique identifier for the resource; defined by the server.
